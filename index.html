@@ -9,22 +9,28 @@ html
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: #000; overflow: hidden; 
             font-family: -apple-system, sans-serif;
+            display: flex; flex-direction: column; /* Вертикальный стек */
         }
 
         .counter { 
-            position: absolute; top: 20px; width: 100%;
+            padding-top: 20px; width: 100%;
             text-align: center; color: #888; font-size: 18px;
-            z-index: 10; pointer-events: none;
+            font-weight: bold; z-index: 10;
         }
 
         .viewer { 
-            width: 100%; height: 100%; 
-            display: flex; align-items: center; justify-content: center;
+            width: 100%; 
+            flex-grow: 1; /* Занимает всё место */
+            display: flex; 
+            align-items: flex-start; /* Прижимаем фото К ВЕРХУ этого блока */
+            justify-content: center;
             touch-action: none;
+            padding-top: 10px; /* Отступ от счетчика */
         }
 
         img { 
-            max-width: 100%; max-height: 100%; 
+            max-width: 100%; 
+            max-height: 85%; /* Чтобы не уходило слишком низко к кнопке */
             object-fit: contain;
             transition: opacity 0.2s;
             user-select: none;
@@ -32,16 +38,21 @@ html
         }
 
         .controls { 
-            position: absolute; bottom: 40px; width: 100%;
-            display: flex; justify-content: center; z-index: 10;
+            padding-bottom: 40px; 
+            width: 100%;
+            display: flex; 
+            justify-content: center; 
+            z-index: 20;
+            background: #000; /* Чтобы под кнопкой не было видно фото */
         }
 
         .download-btn { 
             background: rgba(255, 255, 255, 0.1); 
             color: #fff; border: 1px solid rgba(255,255,255,0.2); 
-            padding: 12px 25px; border-radius: 50px; 
-            font-size: 14px; backdrop-filter: blur(10px);
-            text-decoration: none;
+            padding: 12px 30px; border-radius: 50px; 
+            font-size: 15px; backdrop-filter: blur(10px);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -54,7 +65,7 @@ html
     </div>
 
     <div class="controls">
-        <a id="download-link" class="download-btn" href="1.jpeg" download>💾 Сохранить это фото</a>
+        <button class="download-btn" onclick="savePhoto()">💾 Сохранить это фото</button>
     </div>
 
 <script>
@@ -63,7 +74,6 @@ html
     
     const img = document.getElementById('main-photo');
     const cnt = document.getElementById('counter');
-    const dl = document.getElementById('download-link');
     const zone = document.getElementById('touch-zone');
 
     let startX = 0;
@@ -73,11 +83,19 @@ html
         img.style.opacity = 0;
         setTimeout(() => {
             img.src = photos[cur];
-            dl.href = photos[cur];
-            dl.download = photos[cur];
             cnt.innerText = (cur + 1) + " / " + photos.length;
             img.onload = () => { img.style.opacity = 1; };
         }, 150);
+    }
+
+    function change(dir) {
+        cur = (cur + dir + photos.length) % photos.length;
+        updateGallery();
+    }
+
+    function savePhoto() {
+        // Открываем фото в новом окне — самый надежный способ для Telegram
+        window.open(photos[cur], '_blank');
     }
 
     zone.addEventListener('touchstart', e => {
@@ -91,30 +109,17 @@ html
         const diffX = endX - startX;
         const diffTime = endTime - startTime;
 
-        // Если это быстрый тап (меньше 250мс) и почти без движения пальца
         if (diffTime < 250 && Math.abs(diffX) < 10) {
             const screenWidth = window.innerWidth;
             const clickX = e.changedTouches[0].clientX;
-
-            if (clickX < screenWidth / 3) {
-                // Нажатие в левой трети экрана
-                change(-1);
-            } else if (clickX > (screenWidth * 2) / 3) {
-                // Нажатие в правой трети экрана
-                change(1);
-            }
+            if (clickX < screenWidth / 3) change(-1);
+            else if (clickX > (screenWidth * 2) / 3) change(1);
         } 
-        // Иначе проверяем на свайп
         else if (Math.abs(diffX) > 50) {
-            if (diffX < 0) change(1); // Свайп влево -> вперед
-            else change(-1);          // Свайп вправо -> назад
+            if (diffX < 0) change(1);
+            else change(-1);
         }
     }, false);
-
-    function change(dir) {
-        cur = (cur + dir + photos.length) % photos.length;
-        updateGallery();
-    }
 </script>
 </body>
 </html>
