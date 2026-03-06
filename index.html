@@ -1,37 +1,20 @@
-html
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #000; overflow: hidden; 
-            font-family: -apple-system, sans-serif;
-            display: flex; flex-direction: column; /* Вертикальный стек */
-        }
-
-        .counter { 
-            padding-top: 20px; width: 100%;
-            text-align: center; color: #888; font-size: 18px;
             font-weight: bold; z-index: 10;
         }
 
         .viewer { 
             width: 100%; 
-            flex-grow: 1; /* Занимает всё место */
+            flex-grow: 1; 
             display: flex; 
-            align-items: flex-start; /* Прижимаем фото К ВЕРХУ этого блока */
+            align-items: flex-start; /* Прижимаем к верху */
             justify-content: center;
             touch-action: none;
-            padding-top: 10px; /* Отступ от счетчика */
         }
 
         img { 
-            max-width: 100%; 
-            max-height: 85%; /* Чтобы не уходило слишком низко к кнопке */
-            object-fit: contain;
+            width: 100%; /* Фото ВСЕГДА по ширине экрана */
+            height: auto; 
+            max-height: 80vh; /* Чтобы не перекрыло кнопку снизу */
+            object-fit: cover; /* Заполняет ширину полностью */
             transition: opacity 0.2s;
             user-select: none;
             -webkit-user-drag: none;
@@ -43,13 +26,13 @@ html
             display: flex; 
             justify-content: center; 
             z-index: 20;
-            background: #000; /* Чтобы под кнопкой не было видно фото */
+            background: #000;
         }
 
         .download-btn { 
             background: rgba(255, 255, 255, 0.1); 
             color: #fff; border: 1px solid rgba(255,255,255,0.2); 
-            padding: 12px 30px; border-radius: 50px; 
+            padding: 12px 35px; border-radius: 50px; 
             font-size: 15px; backdrop-filter: blur(10px);
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -65,7 +48,7 @@ html
     </div>
 
     <div class="controls">
-        <button class="download-btn" onclick="savePhoto()">💾 Сохранить это фото</button>
+        <button class="download-btn" onclick="savePhoto()">💾 Сохранить фото</button>
     </div>
 
 <script>
@@ -94,7 +77,6 @@ html
     }
 
     function savePhoto() {
-        // Открываем фото в новом окне — самый надежный способ для Telegram
         window.open(photos[cur], '_blank');
     }
 
