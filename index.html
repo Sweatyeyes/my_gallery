@@ -8,49 +8,34 @@
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: #000; overflow: hidden; 
             font-family: -apple-system, sans-serif;
-            display: flex; flex-direction: column;
         }
-
         .counter { 
-            padding: 20px 0 10px 0; width: 100%;
+            position: absolute; top: 20px; width: 100%;
             text-align: center; color: #888; font-size: 18px;
-            font-weight: bold; z-index: 10;
+            z-index: 10; pointer-events: none;
         }
-
         .viewer { 
-            width: 100%; 
-            flex-grow: 1; 
-            display: flex; 
-            align-items: flex-start; /* Прижимаем к верху */
-            justify-content: center;
+            width: 100%; height: 100%; 
+            display: flex; align-items: center; justify-content: center;
             touch-action: none;
         }
-
         img { 
-            width: 100%; /* Фото ВСЕГДА по ширине экрана */
-            height: auto; 
-            max-height: 80vh; /* Чтобы не перекрыло кнопку снизу */
-            object-fit: cover; /* Заполняет ширину полностью */
+            max-width: 100%; max-height: 100%; 
+            object-fit: contain;
             transition: opacity 0.2s;
             user-select: none;
-            -webkit-user-drag: none;
+            pointer-events: none; /* Чтобы картинка не мешала кликам по зонам */
         }
-
         .controls { 
-            padding-bottom: 40px; 
-            width: 100%;
-            display: flex; 
-            justify-content: center; 
-            z-index: 20;
-            background: #000;
+            position: absolute; bottom: 40px; width: 100%;
+            display: flex; justify-content: center; z-index: 20;
         }
-
-        .download-btn { 
-            background: rgba(255, 255, 255, 0.1); 
-            color: #fff; border: 1px solid rgba(255,255,255,0.2); 
-            padding: 12px 35px; border-radius: 50px; 
+        .btn-save { 
+            background: rgba(255, 255, 255, 0.15); 
+            color: #fff; border: 1px solid rgba(255,255,255,0.3); 
+            padding: 12px 30px; border-radius: 50px; 
             font-size: 15px; backdrop-filter: blur(10px);
-            cursor: pointer;
+            cursor: pointer; font-weight: bold;
             -webkit-tap-highlight-color: transparent;
         }
     </style>
@@ -59,12 +44,12 @@
 
     <div class="counter" id="counter">1 / 9</div>
     
-    <div class="viewer" id="touch-zone">
+    <div class="viewer" id="main-zone">
         <img id="main-photo" src="1.jpeg">
     </div>
 
     <div class="controls">
-        <button class="download-btn" onclick="savePhoto()">💾 Сохранить фото</button>
+        <button class="btn-save" onclick="savePhoto()">📥 Сохранить фото</button>
     </div>
 
 <script>
@@ -73,10 +58,10 @@
     
     const img = document.getElementById('main-photo');
     const cnt = document.getElementById('counter');
-    const zone = document.getElementById('touch-zone');
+    const zone = document.getElementById('main-zone');
 
     let startX = 0;
-    let startTime = 0;
+    let isMoving = false;
 
     function updateGallery() {
         img.style.opacity = 0;
@@ -92,77 +77,40 @@
         updateGallery();
     }
 
-    function savePhoto() {
-        window.open(photos[cur], '_blank');
-    }
-
+    // Обработка касаний
     zone.addEventListener('touchstart', e => {
-        startX = e.changedTouches[0].screenX;
-        startTime = new Date().getTime();
+        startX = e.touches[0].clientX;
+        isMoving = false;
+    }, false);
+
+    zone.addEventListener('touchmove', e => {
+        isMoving = true; // Если палец двигается — это свайп, а не тап
     }, false);
 
     zone.addEventListener('touchend', e => {
-        const endX = e.changedTouches[0].screenX;
-        const endTime = new Date().getTime();
+        const endX = e.changedTouches[0].clientX;
         const diffX = endX - startX;
-        const diffTime = endTime - startTime;
 
-        if (diffTime < 250 && Math.abs(diffX) < 10) {
+        if (isMoving) {
+            // ЛОГИКА СВАЙПА
+            if (Math.abs(diffX) > 50) {
+                if (diffX < 0) change(1); // Влево -> Вперед
+                else change(-1);          // Вправо -> Назад
+            }
+        } else {
+            // ЛОГИКА ТАПА (Клик по краям)
             const screenWidth = window.innerWidth;
-            const clickX = e.changedTouches[0].clientX;
-            if (clickX < screenWidth / 3) change(-1);
-            else if (clickX > (screenWidth * 2) / 3) change(1);
-        } 
-        else if (Math.abs(diffX) > 50) {
-            if (diffX < 0) change(1);
-            else change(-1);
+            if (endX < screenWidth / 3) {
+                change(-1);
+            } else if (endX > (screenWidth * 2) / 3) {
+                change(1);
+            }
         }
     }, false);
-</script>
-</body>
-</html>    let startX = 0;
-    let startTime = 0;
-
-    function updateGallery() {
-        img.style.opacity = 0;
-        setTimeout(() => {
-            img.src = photos[cur];
-            cnt.innerText = (cur + 1) + " / " + photos.length;
-            img.onload = () => { img.style.opacity = 1; };
-        }, 150);
-    }
-
-    function change(dir) {
-        cur = (cur + dir + photos.length) % photos.length;
-        updateGallery();
-    }
 
     function savePhoto() {
         window.open(photos[cur], '_blank');
     }
-
-    zone.addEventListener('touchstart', e => {
-        startX = e.changedTouches[0].screenX;
-        startTime = new Date().getTime();
-    }, false);
-
-    zone.addEventListener('touchend', e => {
-        const endX = e.changedTouches[0].screenX;
-        const endTime = new Date().getTime();
-        const diffX = endX - startX;
-        const diffTime = endTime - startTime;
-
-        if (diffTime < 250 && Math.abs(diffX) < 10) {
-            const screenWidth = window.innerWidth;
-            const clickX = e.changedTouches[0].clientX;
-            if (clickX < screenWidth / 3) change(-1);
-            else if (clickX > (screenWidth * 2) / 3) change(1);
-        } 
-        else if (Math.abs(diffX) > 50) {
-            if (diffX < 0) change(1);
-            else change(-1);
-        }
-    }, false);
 </script>
 </body>
 </html>
