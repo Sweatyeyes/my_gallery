@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -9,34 +10,38 @@
             background: #000; overflow: hidden; 
             font-family: -apple-system, sans-serif;
         }
+
         .counter { 
             position: absolute; top: 20px; width: 100%;
             text-align: center; color: #888; font-size: 18px;
             z-index: 10; pointer-events: none;
         }
+
         .viewer { 
             width: 100%; height: 100%; 
             display: flex; align-items: center; justify-content: center;
             touch-action: none;
         }
+
         img { 
             max-width: 100%; max-height: 100%; 
             object-fit: contain;
             transition: opacity 0.2s;
             user-select: none;
-            pointer-events: none; /* Чтобы картинка не мешала кликам по зонам */
+            -webkit-user-drag: none;
         }
+
         .controls { 
             position: absolute; bottom: 40px; width: 100%;
-            display: flex; justify-content: center; z-index: 20;
+            display: flex; justify-content: center; z-index: 10;
         }
-        .btn-save { 
-            background: rgba(255, 255, 255, 0.15); 
-            color: #fff; border: 1px solid rgba(255,255,255,0.3); 
-            padding: 12px 30px; border-radius: 50px; 
-            font-size: 15px; backdrop-filter: blur(10px);
-            cursor: pointer; font-weight: bold;
-            -webkit-tap-highlight-color: transparent;
+
+        .download-btn { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff; border: 1px solid rgba(255,255,255,0.2); 
+            padding: 12px 25px; border-radius: 50px; 
+            font-size: 14px; backdrop-filter: blur(10px);
+            text-decoration: none;
         }
     </style>
 </head>
@@ -44,12 +49,12 @@
 
     <div class="counter" id="counter">1 / 9</div>
     
-    <div class="viewer" id="main-zone">
+    <div class="viewer" id="touch-zone">
         <img id="main-photo" src="1.jpeg">
     </div>
 
     <div class="controls">
-        <button class="btn-save" onclick="savePhoto()">📥 Сохранить фото</button>
+        <a id="download-link" class="download-btn" href="1.jpeg" download>💾 Сохранить это фото</a>
     </div>
 
 <script>
@@ -58,58 +63,57 @@
     
     const img = document.getElementById('main-photo');
     const cnt = document.getElementById('counter');
-    const zone = document.getElementById('main-zone');
+    const dl = document.getElementById('download-link');
+    const zone = document.getElementById('touch-zone');
 
     let startX = 0;
-    let isMoving = false;
+    let startTime = 0;
 
     function updateGallery() {
         img.style.opacity = 0;
         setTimeout(() => {
             img.src = photos[cur];
+            dl.href = photos[cur];
+            dl.download = photos[cur];
             cnt.innerText = (cur + 1) + " / " + photos.length;
             img.onload = () => { img.style.opacity = 1; };
         }, 150);
     }
 
-    function change(dir) {
-        cur = (cur + dir + photos.length) % photos.length;
-        updateGallery();
-    }
-
-    // Обработка касаний
     zone.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        isMoving = false;
-    }, false);
-
-    zone.addEventListener('touchmove', e => {
-        isMoving = true; // Если палец двигается — это свайп, а не тап
+        startX = e.changedTouches[0].screenX;
+        startTime = new Date().getTime();
     }, false);
 
     zone.addEventListener('touchend', e => {
-        const endX = e.changedTouches[0].clientX;
+        const endX = e.changedTouches[0].screenX;
+        const endTime = new Date().getTime();
         const diffX = endX - startX;
+        const diffTime = endTime - startTime;
 
-        if (isMoving) {
-            // ЛОГИКА СВАЙПА
-            if (Math.abs(diffX) > 50) {
-                if (diffX < 0) change(1); // Влево -> Вперед
-                else change(-1);          // Вправо -> Назад
-            }
-        } else {
-            // ЛОГИКА ТАПА (Клик по краям)
+        // Если это быстрый тап (меньше 250мс) и почти без движения пальца
+        if (diffTime < 250 && Math.abs(diffX) < 10) {
             const screenWidth = window.innerWidth;
-            if (endX < screenWidth / 3) {
+            const clickX = e.changedTouches[0].clientX;
+
+            if (clickX < screenWidth / 3) {
+                // Нажатие в левой трети экрана
                 change(-1);
-            } else if (endX > (screenWidth * 2) / 3) {
+            } else if (clickX > (screenWidth * 2) / 3) {
+                // Нажатие в правой трети экрана
                 change(1);
             }
+        } 
+        // Иначе проверяем на свайп
+        else if (Math.abs(diffX) > 50) {
+            if (diffX < 0) change(1); // Свайп влево -> вперед
+            else change(-1);          // Свайп вправо -> назад
         }
     }, false);
 
-    function savePhoto() {
-        window.open(photos[cur], '_blank');
+    function change(dir) {
+        cur = (cur + dir + photos.length) % photos.length;
+        updateGallery();
     }
 </script>
 </body>
