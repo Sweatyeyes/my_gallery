@@ -1,17 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="no-referrer">
+    <title>Галерея</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .viewer { height: 70vh; width: 100%; display: flex; align-items: center; justify-content: center; }
-        img { max-width: 95%; max-height: 100%; border-radius: 15px; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-        .counter { font-size: 20px; margin-bottom: 20px; color: #888; }
-        .controls { display: flex; gap: 30px; margin-top: 30px; }
-        button { background: #1a1a1a; color: #0088cc; border: 1px solid #333; padding: 15px 35px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        button:active { background: #333; transform: scale(0.95); }
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: -apple-system, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        .counter { font-size: 20px; margin-bottom: 20px; color: #888; font-weight: bold; }
+        .viewer { height: 65vh; width: 100%; display: flex; align-items: center; justify-content: center; }
+        img { 
+            max-width: 95%; 
+            max-height: 100%; 
+            border-radius: 15px; 
+            box-shadow: 0 0 30px rgba(255,255,255,0.1); 
+            object-fit: contain;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .controls { display: flex; gap: 30px; margin-top: 35px; }
+        button { 
+            background: #1a1a1a; 
+            color: #0088cc; 
+            border: 1px solid #333; 
+            padding: 15px 40px; 
+            border-radius: 15px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        button:active { background: #333; transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -19,7 +46,7 @@
     <div class="counter" id="counter">1 / 9</div>
     
     <div class="viewer">
-        <img id="main-photo" src="https://i.ibb.co/7xYhRKSN/IMG-7664.jpg">
+        <img id="main-photo" src="1.jpeg">
     </div>
 
     <div class="controls">
@@ -28,16 +55,10 @@
     </div>
 
 <script>
+    // Массив с твоими локальными файлами на GitHub
     const photos = [
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co",
-        "https://i.ibb.co"
+        "1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", 
+        "5.jpeg", "6.jpeg", "7.jpeg", "8.jpeg", "9.jpeg"
     ];
     
     let cur = 0;
@@ -45,9 +66,13 @@
     const cnt = document.getElementById('counter');
 
     function change(dir) {
-        cur = (cur + dir + photos.length) % photos.length;
-        img.src = photos[cur];
-        cnt.innerText = (cur + 1) + " / " + photos.length;
+        img.style.opacity = 0; // Плавное исчезновение
+        setTimeout(() => {
+            cur = (cur + dir + photos.length) % photos.length;
+            img.src = photos[cur];
+            cnt.innerText = (cur + 1) + " / " + photos.length;
+            img.onload = () => { img.style.opacity = 1; }; // Плавное появление
+        }, 200);
     }
 </script>
 </body>
