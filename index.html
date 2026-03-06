@@ -1,57 +1,54 @@
-<meta name="referrer" content="no-referrer">
-<div id="gallery-app">
-  <div class="counter" id="counter">1 / 9</div>
-  
-  <div class="viewer">
-    <img id="main-photo" src="https://i.ibb.co" />
-  </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .viewer { height: 70vh; width: 100%; display: flex; align-items: center; justify-content: center; }
+        img { max-width: 95%; max-height: 100%; border-radius: 15px; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .counter { font-size: 20px; margin-bottom: 20px; color: #888; }
+        .controls { display: flex; gap: 30px; margin-top: 30px; }
+        button { background: #1a1a1a; color: #0088cc; border: 1px solid #333; padding: 15px 35px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        button:active { background: #333; transform: scale(0.95); }
+    </style>
+</head>
+<body>
 
-  <div class="controls">
-    <button onclick="prevPhoto()">⬅️ Назад</button>
-    <button onclick="nextPhoto()">Вперед ➡️</button>
-  </div>
-</div>
+    <div class="counter" id="counter">1 / 9</div>
+    
+    <div class="viewer">
+        <img id="main-photo" src="https://i.ibb.co/7xYhRKSN/IMG-7664.jpg">
+    </div>
+
+    <div class="controls">
+        <button onclick="change(-1)">⬅️</button>
+        <button onclick="change(1)">➡️</button>
+    </div>
 
 <script>
-  const photos = [
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co",
-    "https://i.ibb.co"
-  ];
-  
-  let currentIndex = 0;
-  const imgElement = document.getElementById('main-photo');
-  const counterElement = document.getElementById('counter');
+    const photos = [
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co",
+        "https://i.ibb.co"
+    ];
+    
+    let cur = 0;
+    const img = document.getElementById('main-photo');
+    const cnt = document.getElementById('counter');
 
-  function updateGallery() {
-    imgElement.src = photos[currentIndex];
-    counterElement.innerText = (currentIndex + 1) + " / " + photos.length;
-  }
-
-  function nextPhoto() {
-    currentIndex = (currentIndex + 1) % photos.length;
-    updateGallery();
-  }
-
-  function prevPhoto() {
-    currentIndex = (currentIndex - 1 + photos.length) % photos.length;
-    updateGallery();
-  }
+    function change(dir) {
+        cur = (cur + dir + photos.length) % photos.length;
+        img.src = photos[cur];
+        cnt.innerText = (cur + 1) + " / " + photos.length;
+    }
 </script>
-
-<style>
-  body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-  #gallery-app { text-align: center; width: 100%; padding-bottom: 20px; }
-  .viewer { height: 75vh; display: flex; align-items: center; justify-content: center; margin: 5px 0; }
-  img { max-width: 95%; max-height: 100%; border-radius: 12px; }
-  .counter { font-size: 16px; color: #888; font-weight: bold; margin-top: 10px; }
-  .controls { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-  button { background: #222; color: #0088cc; border: 1px solid #333; padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-  button:active { background: #111; scale: 0.95; }
-</style>
+</body>
+</html>
